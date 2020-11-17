@@ -8,8 +8,4 @@ export class Tweet {
         this.data = data;
         this.client = client;
     }
-
-    generateUrl() {
-
-    }
 }
