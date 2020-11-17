@@ -19,7 +19,7 @@ export interface TweetType {
     possibly_sensitive?: boolean;
     lang?: string;
     source?: string;
-    includes: {
+    includes?: {
         tweets?: TweetType[];
         users?: UserType[];
         places?: PlaceType[];

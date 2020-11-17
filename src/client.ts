@@ -1,4 +1,5 @@
 import consts from "./consts.ts";
+import { Tweet } from "./structs/Tweet.ts";
 import { Fields, TweetType } from "./types/tweet.ts";
 
 export class Twino {
@@ -14,41 +15,43 @@ export class Twino {
     }
 
     async getTweets(...ids: string[]): Promise<TweetType[]> {
-        var temp = await this._fetch<Response>("GET", `tweets?ids=${ids.join(',')}`, "", false)
+        var temp = await this._fetch<any>("GET", `tweets?ids=${ids.join(',')}`, "")
         return (await temp.json()).data.map((x: any) => x as TweetType)
     }
 
-    async getTweet(id: string): Promise<TweetType> {
-        var temp = await this._fetch<Response>("GET", `tweets?ids=${id}`, "", false)
-        return (await temp.json()).data[0] as TweetType
+    async getTweet(id: string): Promise<Tweet> {
+        var temp = await this._fetch<any>("GET", `tweets?ids=${id}`, "")
+        var data = { ...temp.data[0], includes: { ...temp.includes } };
+        return new Tweet(data, this)
     }
 
-    async getTweetWithOptions(id: string, options: Fields) {
+    async getTweetWithOptions(id: string, options: Fields): Promise<Tweet> {
         var optionsString = "";
         if (options.all) options = { expansions: true, media: true, place: true, poll: true, tweet: true, user: true }
         if (options.expansions) optionsString += "&expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
-        if (options.media) optionsString += "&media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics,promoted_metrics"
+        if (options.media) optionsString += "&media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics"
         if (options.place) optionsString += "&place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type"
         if (options.poll) optionsString += "&poll.fields=duration_minutes,end_datetime,id,options,voting_status"
         if (options.tweet) optionsString += "&tweet.fields=attachments,author_id,context_annotations,conversation_id,created_at,entities,geo,id,in_reply_to_user_id,lang,public_metrics,possibly_sensitive,referenced_tweets,source,text,withheld"
         if (options.user) optionsString += "&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld"
 
-        var temp = await this._fetch<Response>("GET", `tweets?ids=${id}${optionsString}`, "", false)
-        return (await temp.json()).data[0] as TweetType
+        var temp = await this._fetch<any>("GET", `tweets?ids=${id}${optionsString}`, "")
+        var data = { ...temp.data[0], includes: { ...temp.includes } };
+        return new Tweet(data, this)
     }
 
-    async getTweetsWithOptions(id: string[], options: Fields) {
+    async getTweetsWithOptions(id: string[], options: Fields): Promise<TweetType[]> {
         var optionsString = "";
         if (options.all) options = { expansions: true, media: true, place: true, poll: true, tweet: true, user: true }
         if (options.expansions) optionsString += "&expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
-        if (options.media) optionsString += "&media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics,promoted_metrics"
+        if (options.media) optionsString += "&media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics"
         if (options.place) optionsString += "&place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type"
         if (options.poll) optionsString += "&poll.fields=duration_minutes,end_datetime,id,options,voting_status"
         if (options.tweet) optionsString += "&tweet.fields=attachments,author_id,context_annotations,conversation_id,created_at,entities,geo,id,in_reply_to_user_id,lang,public_metrics,possibly_sensitive,referenced_tweets,source,text,withheld"
         if (options.user) optionsString += "&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld"
 
-        var temp = await this._fetch<Response>("GET", `tweets?ids=${id.join(",")}${optionsString}`, "", false)
-        return (await temp.json()).data.map((x: any) => x as TweetType)
+        var temp = await this._fetch<any>("GET", `tweets?ids=${id.join(",")}${optionsString}`, "")
+        return temp.data.map((x: any) => x as TweetType)
     }
 
     async _fetch<T>(method: string, path: string, body: string | FormData | null = "", json = true, contentType: string | boolean = "application/json", headers: any = {}): Promise<T> {
