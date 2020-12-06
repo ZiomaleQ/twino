@@ -16,15 +16,27 @@ export class Twino {
     }
 
     async getTweet(id: string, options: Fields = {}): Promise<TweetType> {
-        var optionsString = this._createOptionsString(options);
-        var temp = await this._fetch<any>("GET", `tweets?ids=${id}${optionsString}`, "")
-        return { ...temp.data[0], includes: { ...temp.includes } }
+        var optionsString = this._createOptionsString(options, true);
+        var temp = await this._fetch<any>("GET", `tweets/${id}${optionsString}`, "")
+        return { ...temp.data, includes: { ...temp.includes } }
     }
 
     async getTweets(id: string[], options: Fields = {}): Promise<TweetType[]> {
         var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id.join(",")}${optionsString}`, "")
         return temp.data as TweetType[]
+    }
+
+    async getUser(id: string, options: Fields = {}): Promise<UserType> {
+        var optionsString = this._createOptionsString(options, true);
+        var temp = await this._fetch<any>("GET", `users/${id}${optionsString}`, "")
+        return temp.data
+    }
+
+    async getUsers(ids: string[], options: Fields = {}): Promise<UserType[]> {
+        var optionsString = this._createOptionsString(options);
+        var temp = await this._fetch<any>("GET", `users?ids=${ids.join(",")}${optionsString}`, "")
+        return temp.data as UserType[]
     }
 
     async getUserBy(username: string, options: Fields = {}): Promise<UserType> {
@@ -39,15 +51,33 @@ export class Twino {
         return temp.data as UserType[]
     }
 
-    _createOptionsString(options: Fields): string {
-        var optionsString = "";
+    _createOptionsString(options: Fields, fromBlank = false): string {
+        var optionsString = "", x = false;
         if (options.all) options = { expansions: true, media: true, place: true, poll: true, tweet: true, user: true }
-        if (options.expansions) optionsString += "&expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
-        if (options.media) optionsString += "&media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics"
-        if (options.place) optionsString += "&place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type"
-        if (options.poll) optionsString += "&poll.fields=duration_minutes,end_datetime,id,options,voting_status"
-        if (options.tweet) optionsString += "&tweet.fields=attachments,author_id,context_annotations,conversation_id,created_at,entities,geo,id,in_reply_to_user_id,lang,public_metrics,possibly_sensitive,referenced_tweets,source,text,withheld"
-        if (options.user) optionsString += "&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld"
+        if (options.expansions) {
+            optionsString += `${fromBlank && !x ? "?" : "&"}expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id`
+            x = true
+        }    
+        if (options.media) {
+            optionsString += `${fromBlank && !x ? "?" : "&"}media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics`
+            x = true
+        }    
+        if (options.place) {
+            optionsString += `${fromBlank && !x ? "?" : "&"}place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type`
+            x = true
+        }
+        if (options.poll) {
+            optionsString += `${fromBlank && !x ? "?" : "&"}poll.fields=duration_minutes,end_datetime,id,options,voting_status`
+            x = true
+        }
+        if (options.tweet) {
+            optionsString += `${fromBlank && !x ? "?" : "&"}tweet.fields=attachments,author_id,context_annotations,conversation_id,created_at,entities,geo,id,in_reply_to_user_id,lang,public_metrics,possibly_sensitive,referenced_tweets,source,text,withheld`
+            x = true
+        }
+        if (options.user) {
+            optionsString += `${fromBlank && !x ? "?" : "&"}user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld`
+            x = true
+        }
 
         return optionsString
     }
