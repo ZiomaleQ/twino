@@ -1,7 +1,6 @@
 import { Twino } from "./client.ts";
 import { Fields } from "./types/tweet.ts";
 import { Evt } from "https://deno.land/x/evt/mod.ts";
-import { Tweet } from "./structs/Tweet.ts";
 import { TweetType } from "./types/tweet.ts"
 import consts from "./consts.ts";
 
@@ -21,7 +20,7 @@ export class Stream {
         this.rules.push({ value, tag })
     }
 
-    async connect(options: Fields): Promise<{tweet: Evt<Tweet>, end: Evt<null>, disconnect: () => void}> {
+    async connect(options: Fields): Promise<{tweet: Evt<TweetType>, end: Evt<null>, disconnect: () => void}> {
         if (this.endpoint == consts.ENDPOINTS.FILTERED_STREAM) {
             const rules = await this.client._fetch("GET", consts.ENDPOINTS.RULES) as any
             const ids = rules.data.map((x: any) => x.id) ?? []
@@ -30,7 +29,7 @@ export class Stream {
         }
 
         const events = {
-            tweet: new Evt<Tweet>(),
+            tweet: new Evt<TweetType>(),
             end: new Evt<null>(),
             disconnect: () => {}
         }
@@ -58,7 +57,7 @@ export class Stream {
 
                             try {
                                 const parsed = JSON.parse(decoder.decode(value))
-                                events.tweet.post(new Tweet(parsed.data as TweetType, t.client))
+                                events.tweet.post(parsed.data as TweetType)
                             } catch {}
                             controller.enqueue(value)
                             return pump()

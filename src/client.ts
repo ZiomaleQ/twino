@@ -1,6 +1,5 @@
 import consts from "./consts.ts";
 import { Stream } from "./stream.ts";
-import { Tweet } from "./structs/Tweet.ts";
 import { Fields, TweetType } from "./types/tweet.ts";
 import { UserType } from "./types/user.ts";
 
@@ -16,11 +15,10 @@ export class Twino {
         this.secret_key = secret_key;
     }
 
-    async getTweet(id: string, options: Fields = {}): Promise<Tweet> {
+    async getTweet(id: string, options: Fields = {}): Promise<TweetType> {
         var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id}${optionsString}`, "")
-        var data = { ...temp.data[0], includes: { ...temp.includes } };
-        return new Tweet(data, this)
+        return { ...temp.data[0], includes: { ...temp.includes } }
     }
 
     async getTweets(id: string[], options: Fields = {}): Promise<TweetType[]> {
@@ -32,8 +30,7 @@ export class Twino {
     async getUserBy(username: string, options: Fields = {}): Promise<UserType[]> {
         var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `${consts.ENDPOINTS.USERS_BY}?usernames=${username}${optionsString}`, "")
-        var data = { ...temp.data[0], includes: { ...temp.includes } };
-        return data
+        return { ...temp.data[0], includes: { ...temp.includes } }
     }
 
     async getUsersBy(usernames: string[], options: Fields = {}): Promise<UserType[]> {
