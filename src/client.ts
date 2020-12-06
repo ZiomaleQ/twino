@@ -26,7 +26,7 @@ export class Twino {
     async getTweets(id: string[], options: Fields = {}): Promise<TweetType[]> {
         var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id.join(",")}${optionsString}`, "")
-        return temp.data.map((x: any) => x as TweetType)
+        return temp.data as TweetType[]
     }
 
     async getUserBy(username: string, options: Fields = {}): Promise<UserType[]> {
@@ -39,7 +39,7 @@ export class Twino {
     async getUsersBy(usernames: string[], options: Fields = {}): Promise<UserType[]> {
         var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `${consts.ENDPOINTS.USERS_BY}?usernames=${usernames.join(",")}${optionsString}`, "")
-        return temp.data.map((x: any) => x as UserType)
+        return temp.data as UserType[]
     }
 
     _createOptionsString(options: Fields): string {
