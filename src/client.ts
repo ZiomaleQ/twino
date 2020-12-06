@@ -88,8 +88,11 @@ export class Twino {
         return resp
     }
 
-    createStream(): Stream {
+    createFilteredStream(): Stream {
         return new Stream(this)
     }
 
+    createSampledStream(): Stream {
+        return new Stream(this, consts.ENDPOINTS.SAMPLED_STREAM)
+    }
 }

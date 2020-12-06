@@ -9,9 +9,12 @@ export class Stream {
     client: Twino
     rules: { value: string; tag?: string }[]
     connected = false
-    constructor(client: Twino) {
-        this.client = client;
-        this.rules = [];
+    endpoint: string
+
+    constructor(client: Twino, endpoint = consts.ENDPOINTS.FILTERED_STREAM) {
+        this.client = client
+        this.rules = []
+        this.endpoint = endpoint
     }
 
     async addRule(value: string, tag?: string) {
@@ -19,10 +22,12 @@ export class Stream {
     }
 
     async connect(options: Fields): Promise<{tweet: Evt<Tweet>, end: Evt<null>, disconnect: () => void}> {
-        const rules = await this.client._fetch("GET", "tweets/search/stream/rules") as any
-        const ids = rules.data.map((x: any) => x.id) ?? []
-        await this.client._fetch("POST", "tweets/search/stream/rules", JSON.stringify({ ids }))
-        await this.client._fetch("POST", "tweets/search/stream/rules", JSON.stringify({ add: this.rules }))
+        if (this.endpoint == consts.ENDPOINTS.FILTERED_STREAM) {
+            const rules = await this.client._fetch("GET", consts.ENDPOINTS.RULES) as any
+            const ids = rules.data.map((x: any) => x.id) ?? []
+            await this.client._fetch("POST", consts.ENDPOINTS.RULES, JSON.stringify({ ids }))
+            await this.client._fetch("POST", consts.ENDPOINTS.RULES, JSON.stringify({ add: this.rules }))
+        }
 
         const events = {
             tweet: new Evt<Tweet>(),
@@ -30,7 +35,8 @@ export class Stream {
             disconnect: () => {}
         }
 
-        fetch(`${consts.BASE_URL}/tweets/search/stream`, {
+        console.log(this.endpoint)
+        fetch(`${consts.BASE_URL}/${this.endpoint}`, {
             method: "GET", headers: {
                 "Authorization": `Bearer ${this.client.bearer}`
             }
