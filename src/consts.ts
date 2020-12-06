@@ -4,5 +4,6 @@ export default {
         FILTERED_STREAM: "tweets/search/stream",
         SAMPLED_STREAM:  "tweets/sample/stream",
         RULES:           "tweets/search/stream/rules",
+        USERS_BY:        "users/by",
     }
 }

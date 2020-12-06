@@ -2,6 +2,7 @@ import consts from "./consts.ts";
 import { Stream } from "./stream.ts";
 import { Tweet } from "./structs/Tweet.ts";
 import { Fields, TweetType } from "./types/tweet.ts";
+import { UserType } from "./types/user.ts";
 
 export class Twino {
     bearer: string;
@@ -16,19 +17,32 @@ export class Twino {
     }
 
     async getTweet(id: string, options: Fields = {}): Promise<Tweet> {
-        var optionsString = this._createTweetOptionsString(options);
+        var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id}${optionsString}`, "")
         var data = { ...temp.data[0], includes: { ...temp.includes } };
         return new Tweet(data, this)
     }
 
     async getTweets(id: string[], options: Fields = {}): Promise<TweetType[]> {
-        var optionsString = this._createTweetOptionsString(options);
+        var optionsString = this._createOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id.join(",")}${optionsString}`, "")
         return temp.data.map((x: any) => x as TweetType)
     }
 
-    _createTweetOptionsString(options: Fields): string {
+    async getUserBy(username: string, options: Fields = {}): Promise<UserType[]> {
+        var optionsString = this._createOptionsString(options);
+        var temp = await this._fetch<any>("GET", `${consts.ENDPOINTS.USERS_BY}?usernames=${username}${optionsString}`, "")
+        var data = { ...temp.data[0], includes: { ...temp.includes } };
+        return data
+    }
+
+    async getUsersBy(usernames: string[], options: Fields = {}): Promise<UserType[]> {
+        var optionsString = this._createOptionsString(options);
+        var temp = await this._fetch<any>("GET", `${consts.ENDPOINTS.USERS_BY}?usernames=${usernames.join(",")}${optionsString}`, "")
+        return temp.data.map((x: any) => x as UserType)
+    }
+
+    _createOptionsString(options: Fields): string {
         var optionsString = "";
         if (options.all) options = { expansions: true, media: true, place: true, poll: true, tweet: true, user: true }
         if (options.expansions) optionsString += "&expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
