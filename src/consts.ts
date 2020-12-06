@@ -5,5 +5,6 @@ export default {
         SAMPLED_STREAM:  "tweets/sample/stream",
         RULES:           "tweets/search/stream/rules",
         USERS_BY:        "users/by",
+        USER_BY:         "users/by/username",
     }
 }

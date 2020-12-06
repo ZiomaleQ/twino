@@ -27,10 +27,10 @@ export class Twino {
         return temp.data as TweetType[]
     }
 
-    async getUserBy(username: string, options: Fields = {}): Promise<UserType[]> {
+    async getUserBy(username: string, options: Fields = {}): Promise<UserType> {
         var optionsString = this._createOptionsString(options);
-        var temp = await this._fetch<any>("GET", `${consts.ENDPOINTS.USERS_BY}?usernames=${username}${optionsString}`, "")
-        return { ...temp.data[0], includes: { ...temp.includes } }
+        var temp = await this._fetch<any>("GET", `${consts.ENDPOINTS.USER_BY}/${username}${optionsString}`, "")
+        return temp.data
     }
 
     async getUsersBy(usernames: string[], options: Fields = {}): Promise<UserType[]> {
