@@ -15,31 +15,20 @@ export class Twino {
         this.secret_key = secret_key;
     }
 
-    async getTweets(...ids: string[]): Promise<TweetType[]> {
-        var temp = await this._fetch<any>("GET", `tweets?ids=${ids.join(',')}`, "")
-        return (await temp.json()).data.map((x: any) => x as TweetType)
-    }
-
-    async getTweet(id: string): Promise<Tweet> {
-        var temp = await this._fetch<any>("GET", `tweets?ids=${id}`, "")
-        var data = { ...temp.data[0], includes: { ...temp.includes } };
-        return new Tweet(data, this)
-    }
-
-    async getTweetWithOptions(id: string, options: Fields): Promise<Tweet> {
-        var optionsString = this._createOptionsString(options);
+    async getTweet(id: string, options: Fields = {}): Promise<Tweet> {
+        var optionsString = this._createTweetOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id}${optionsString}`, "")
         var data = { ...temp.data[0], includes: { ...temp.includes } };
         return new Tweet(data, this)
     }
 
-    async getTweetsWithOptions(id: string[], options: Fields): Promise<TweetType[]> {
-        var optionsString = this._createOptionsString(options);
+    async getTweets(id: string[], options: Fields = {}): Promise<TweetType[]> {
+        var optionsString = this._createTweetOptionsString(options);
         var temp = await this._fetch<any>("GET", `tweets?ids=${id.join(",")}${optionsString}`, "")
         return temp.data.map((x: any) => x as TweetType)
     }
 
-    _createOptionsString(options: Fields): string {
+    _createTweetOptionsString(options: Fields): string {
         var optionsString = "";
         if (options.all) options = { expansions: true, media: true, place: true, poll: true, tweet: true, user: true }
         if (options.expansions) optionsString += "&expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
