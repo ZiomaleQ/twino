@@ -22,9 +22,13 @@ export class Stream {
 
     async connect(options: Fields): Promise<{tweet: Evt<TweetType>, end: Evt<null>, disconnect: () => void}> {
         if (this.endpoint == consts.ENDPOINTS.FILTERED_STREAM) {
+            this.client.debug.post("Fetching current rules...")
             const rules = await this.client._fetch("GET", consts.ENDPOINTS.RULES) as any
+            this.client.debug.post(`Current rules: ${JSON.stringify(rules.data)}`)
             const ids = rules.data.map((x: any) => x.id) ?? []
-            await this.client._fetch("POST", consts.ENDPOINTS.RULES, JSON.stringify({ ids }))
+            this.client.debug.post(`Deleting rules; ${JSON.stringify(ids)}`)
+            await this.client._fetch("POST", consts.ENDPOINTS.RULES, JSON.stringify({ delete: { ids } }))
+            this.client.debug.post(`Adding rules: ${JSON.stringify(this.rules)}`)
             await this.client._fetch("POST", consts.ENDPOINTS.RULES, JSON.stringify({ add: this.rules }))
         }
 
@@ -34,7 +38,7 @@ export class Stream {
             disconnect: () => {}
         }
 
-        console.log(this.endpoint)
+        this.client.debug.post("Starting stream...")
         fetch(`${consts.BASE_URL}/${this.endpoint}`, {
             method: "GET", headers: {
                 "Authorization": `Bearer ${this.client.bearer}`
@@ -47,18 +51,23 @@ export class Stream {
             const t = this
             return new ReadableStream({
                 start(controller) {
+                    t.client.debug.post("Stream started, waiting for data...")
                     const pump = (): any => {
                         events.disconnect = () => reader.cancel()
                         return reader.read().then(({ done, value }) => {
                             if (done) {
+                                t.client.debug.post("Stream done.")
                                 controller.close()
                                 return events.end.post(null)
                             }
 
                             try {
+                                t.client.debug.post("Parsing tweet...")
                                 const parsed = JSON.parse(decoder.decode(value))
                                 events.tweet.post(parsed.data as TweetType)
-                            } catch {}
+                            } catch {
+                                t.client.debug.post("Some error occured during parse, ignoring.")
+                            }
                             controller.enqueue(value)
                             return pump()
                         });

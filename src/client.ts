@@ -2,12 +2,14 @@ import consts from "./consts.ts";
 import { Stream } from "./stream.ts";
 import { Fields, TweetType } from "./types/tweet.ts";
 import { UserType } from "./types/user.ts";
+import { Evt } from "https://deno.land/x/evt/mod.ts";
 
 export class Twino {
     bearer: string;
     api_key: string;
     secret_key: string;
     lastReq = 0;
+    debug = new Evt<string>()
 
     constructor(bearer: string = "", api_key: string = "", secret_key: string = "") {
         this.bearer = bearer;
