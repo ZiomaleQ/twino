@@ -38,8 +38,8 @@ export class Stream {
             disconnect: () => {}
         }
 
-        this.client.debug.post("Starting stream...")
-        fetch(`${consts.BASE_URL}/${this.endpoint}`, {
+        this.client.debug.post(`Starting stream, URL: ${consts.BASE_URL}/${this.endpoint}${this.client._createOptionsString(options, true)}`)
+        fetch(`${consts.BASE_URL}/${this.endpoint}${this.client._createOptionsString(options, true)}`, {
             method: "GET", headers: {
                 "Authorization": `Bearer ${this.client.bearer}`
             }

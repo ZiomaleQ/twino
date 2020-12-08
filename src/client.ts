@@ -1,8 +1,11 @@
 import consts from "./consts.ts";
 import { Stream } from "./stream.ts";
-import { Fields, TweetType } from "./types/tweet.ts";
-import { UserType } from "./types/user.ts";
+import { ExpansionFieldEnum, Fields, TweetFieldEnum, TweetType } from "./types/tweet.ts";
+import { UserFieldEnum, UserType } from "./types/user.ts";
 import { Evt } from "https://deno.land/x/evt/mod.ts";
+import { MediaFieldEnum } from "./types/media.ts";
+import { PlaceFieldEnum } from "./types/place.ts";
+import { PollFieldEnum } from "./types/poll.ts";
 
 export class Twino {
     bearer: string;
@@ -53,31 +56,43 @@ export class Twino {
         return temp.data as UserType[]
     }
 
+    // deno-lint-ignore no-explicit-any
+    _enumValues(input: any) {
+        return Object.keys(input)
+            .map(x => input[x])
+    }
+
     _createOptionsString(options: Fields, fromBlank = false): string {
         var optionsString = "", x = false;
         if (options.all) options = { expansions: true, media: true, place: true, poll: true, tweet: true, user: true }
         if (options.expansions) {
-            optionsString += `${fromBlank && !x ? "?" : "&"}expansions=attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id`
+            if (typeof options.expansions == "boolean" && options.expansions == true) options.expansions = this._enumValues(ExpansionFieldEnum)
+            optionsString += `${fromBlank && !x ? "?" : "&"}expansions=${options.expansions.join(",")}`
             x = true
         }    
         if (options.media) {
-            optionsString += `${fromBlank && !x ? "?" : "&"}media.fields=duration_ms,height,media_key,preview_image_url,type,url,width,public_metrics`
+            if (typeof options.media == "boolean" && options.media == true) options.media = this._enumValues(MediaFieldEnum)
+            optionsString += `${fromBlank && !x ? "?" : "&"}media.fields=${options.media.join(",")}`
             x = true
         }    
         if (options.place) {
-            optionsString += `${fromBlank && !x ? "?" : "&"}place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type`
+            if (typeof options.place == "boolean" && options.place == true) options.place = this._enumValues(PlaceFieldEnum)
+            optionsString += `${fromBlank && !x ? "?" : "&"}place.fields=${options.place.join(",")}`
             x = true
         }
         if (options.poll) {
-            optionsString += `${fromBlank && !x ? "?" : "&"}poll.fields=duration_minutes,end_datetime,id,options,voting_status`
+            if (typeof options.poll == "boolean" && options.poll == true) options.poll = this._enumValues(PollFieldEnum)
+            optionsString += `${fromBlank && !x ? "?" : "&"}poll.fields=${options.poll.join(",")}`
             x = true
         }
         if (options.tweet) {
-            optionsString += `${fromBlank && !x ? "?" : "&"}tweet.fields=attachments,author_id,context_annotations,conversation_id,created_at,entities,geo,id,in_reply_to_user_id,lang,public_metrics,possibly_sensitive,referenced_tweets,source,text,withheld`
+            if (typeof options.tweet == "boolean" && options.tweet == true) options.tweet = this._enumValues(TweetFieldEnum)
+            optionsString += `${fromBlank && !x ? "?" : "&"}tweet.fields=${options.tweet.join(",")}`
             x = true
         }
         if (options.user) {
-            optionsString += `${fromBlank && !x ? "?" : "&"}user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld`
+            if (typeof options.user == "boolean" && options.user == true) options.user = this._enumValues(UserFieldEnum)
+            optionsString += `${fromBlank && !x ? "?" : "&"}user.fields=${options.user.join(",")}`
             x = true
         }
 

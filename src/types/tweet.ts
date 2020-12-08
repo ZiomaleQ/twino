@@ -1,7 +1,7 @@
-import { MediaType } from "./media.ts";
-import { PlaceType } from "./place.ts";
-import { PollType } from "./poll.ts";
-import { UserType } from "./user.ts";
+import { MediaFieldEnum, MediaType } from "./media.ts";
+import { PlaceFieldEnum, PlaceType } from "./place.ts";
+import { PollFieldEnum, PollType } from "./poll.ts";
+import { UserFieldEnum, UserType } from "./user.ts";
 
 export interface TweetType {
     id: string;
@@ -42,7 +42,7 @@ export interface AttachmentType {
 
 export interface GeoType {
     coordinates: {
-        coordinates: any[] | undefined;
+        coordinates?: any[];
         type?: string;
     }
     place_id: string;
@@ -101,12 +101,43 @@ export interface PublicMetricsType {
     quote_count: number;
 }
 
+export enum TweetFieldEnum {
+    attachments = "attachments", 
+    author_id = "author_id", 
+    context_annotations = "context_annotations", 
+    conversation_id = "conversation_id", 
+    created_at = "created_at", 
+    entities = "entities", 
+    geo = "geo", 
+    id = "id", 
+    in_reply_to_user_id = "in_reply_to_user_id", 
+    lang = "lang", 
+    public_metrics = "public_metrics", 
+    possibly_sensitive = "possibly_sensitive", 
+    referenced_tweets = "referenced_tweets", 
+    reply_settings = "reply_settings", 
+    source = "source", 
+    text = "text", 
+    withheld = "withheld"
+}
+
+export enum ExpansionFieldEnum {
+    attachments_poll_ids = "attachments.poll_ids", 
+    attachments_media_keys = "attachments.media_keys", 
+    author_id = "author_id", 
+    entities_mentions_username = "entities.mentions.username", 
+    geo_place_id = "geo.place_id", 
+    in_reply_to_user_id = "in_reply_to_user_id", 
+    referenced_tweets_id = "referenced_tweets.id", 
+    referenced_tweets_id_author_id = "referenced_tweets.id.author_id"
+}
+
 export interface Fields {
     all?: boolean;
-    expansions?: boolean;
-    media?: boolean;
-    place?: boolean;
-    poll?: boolean;
-    tweet?: boolean;
-    user?: boolean;
+    expansions?: boolean | ExpansionFieldEnum[];
+    media?: boolean | MediaFieldEnum[];
+    place?: boolean | PlaceFieldEnum[];
+    poll?: boolean | PollFieldEnum[];
+    tweet?: boolean | TweetFieldEnum[];
+    user?: boolean | UserFieldEnum[];
 }
